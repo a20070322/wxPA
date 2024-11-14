@@ -1,6 +1,15 @@
 # wxPA
 wxPA 是基于 [gewechaty](https://github.com/mikoshu/gewechaty)项目的二次开发。底层使用 [Gewechat](https://github.com/Devo919/Gewechat?tab=readme-ov-file)。
 
+## 启动方式
+
+### docker-compose
+目前此种启动方式还在实验中，懒人的福音
+
+```shell
+docker-compose up
+```
+
 
 ## 免责声明【必读】
 
