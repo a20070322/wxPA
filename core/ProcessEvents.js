@@ -19,15 +19,8 @@ class ProcessEvents {
   async startRoomListen() {
     const { bot } = this.core;
     // TODO 根据配置，后续查询方法自己实现，且转room类
-
     // const rooms = await bot.Room.findAll();
     const rooms = [await bot.Room.find("51555423480@chatroom")];
-    /* The line `const rooms = await bot.Room.findAll();` is calling a method `findAll()` on the
-    `bot.Room` object to retrieve a list of all available rooms. This method likely queries a
-    database or an external service to fetch the list of rooms that the bot has access to. The
-    result is then stored in the `rooms` variable for further processing, such as iterating over
-    each room to perform specific actions like adding event listeners or handling room-related
-    functionalities. */
     // 因框架限制 部分未保存群需要手动 同步才可选择，后续业务处理
     //  const info = await GetRoomInfo({
     //   appId: getAppId(),
@@ -37,7 +30,6 @@ class ProcessEvents {
     //   db.insertRoom(info);
     // }
     rooms.forEach(async (room) => {
-      // 以下事件 短时间会请求两次，延时三秒执行
       room.on("join", this.eventRoomJoin.bind(this));
       room.on("leave", this.eventRoomLeave.bind(this));
       room.on("topic", this.eventRoomTopic.bind(this));
@@ -108,13 +100,17 @@ class ProcessEvents {
       //类型详见 MessageType 表
       console.log("收到文字", msg.text(), msg);
     }
+    console.log("MsgType", msg.type());
     if (msg.type() === bot.Message.Type.Image) {
       console.log("收到图片");
+      const { url } = await msg.toFileBox();
+      console.log("图片地址:", url);
     }
   }
   eventAll(msg) {
+    // console.log("eventAll", "原始消息", msg.TypeName);
     // 实现自定义的其他监听扩展
-    if ((msg.TypeName = "ModContacts")) {
+    if (msg.TypeName == "ModContacts") {
       // console.log("eventAll", msg);
     }
   }
