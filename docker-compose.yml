@@ -1,0 +1,29 @@
+services:
+  wxpa:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      gewe:
+        condition: service_healthy
+    environment:
+      - GEWE_HOST=gewe
+      - WXPA_HOST=wxpa
+  gewe:
+    image: registry.cn-chengdu.aliyuncs.com/tu1h/wechotd:alpine
+    volumes:
+      - ./temp:/root/temp
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy=off", "http://localhost:2531"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - "2531:2531"
+      - "2532:2532"
+    environment:
+      - GEWE_HOST=gewe
+      - WXPA_HOST=wxpa

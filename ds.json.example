@@ -1,0 +1,10 @@
+{
+  "config": {
+    "wxpaPort": "3000",
+    "wxpaHost": "10.147.19.18",
+    "geweHost": "10.147.19.244",
+    "gewePort": "2531",
+    "geweDownPort": "2532",
+    "debug": false
+  }
+}
