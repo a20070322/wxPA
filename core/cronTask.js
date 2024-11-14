@@ -1,4 +1,4 @@
-const { request } = require("../utils/request");
+const { getIp } = require("../utils/ip");
 
 /** 发送IP任务 */
 const taskSendIp = async (core, payload) => {
@@ -8,9 +8,8 @@ const taskSendIp = async (core, payload) => {
     console.log("user not found");
     return;
   }
-  const { data } = await request("https://ipinfo.io/ip");
-  console.log(`get ip: ${data}`);
-  user.say(data);
+  const ip = await getIp();
+  user.say(ip);
 };
 
 exports.cronTaskInit = async (core) => {

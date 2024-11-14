@@ -20,8 +20,10 @@ exports.bootstrap = async (config) => {
   const nodeCron = new NodeCron(core);
   core.delayQueue = delayQueue;
   core.nodeCron = nodeCron;
-  // 处理事件
-  const processEvents = new ProcessEvents(core);
+
   // 定时任务
   await cronTaskInit(core);
+  // 处理事件
+  const processEvents = new ProcessEvents(core);
+  await processEvents.initListenEvent();
 };

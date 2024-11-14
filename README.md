@@ -1,15 +1,31 @@
 # wxPA
+
 wxPA 是基于 [gewechaty](https://github.com/mikoshu/gewechaty)项目的二次开发。底层使用 [Gewechat](https://github.com/Devo919/Gewechat?tab=readme-ov-file)。
 
 ## 启动方式
 
+### nodejs
+
+```shell
+node main.js
+```
+
 ### docker-compose
-目前此种启动方式还在实验中，懒人的福音
+
+目前此种启动方式还在实验中，gewe 直接打包，懒人的福音。
 
 ```shell
 docker-compose up
 ```
 
+## 功能
+
+[ ] webUI
+[ ] 定时任务
+[ ] 延时任务
+[ ] 群聊自动回复
+[ ] 群聊自动加人
+[ ] 群聊自动踢人
 
 ## 免责声明【必读】
 
@@ -22,8 +38,6 @@ docker-compose up
 - 本框架的使用者应遵守相关法律法规，尊重微信的版权和隐私，不得侵犯微信或其他第三方的合法权益，不得从事任何违法或不道德的行为。
 
 - 本框架的使用者在下载、安装、运行或使用本工具时，即表示已阅读并同意本免责声明。如有异议，请立即停止使用本工具，并删除所有相关文件。
-
-
 
 ## 五、贡献
 
