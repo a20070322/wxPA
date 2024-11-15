@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 3000
 
 # 运行应用
-CMD ["node", "main.js"]
+CMD ["npm",'run', "start"]

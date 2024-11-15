@@ -1,37 +1,27 @@
-const { debounce } = require("../utils");
-const { MsgParser } = require("./MsgParser");
+const handleList = require("../handle");
 
-const parser = [MsgParser];
 // 监听事件
 class ProcessEvents {
   core = null;
-  parserList = [];
+  handleList = [];
   constructor(core) {
     console.log("ProcessEvents init start...");
     this.core = core;
   }
-  initListenEvent() {
+  async initListenEvent() {
     const { bot } = this.core;
-    this.parserList = parser.map((item) => new item(this.core));
+    this.handleList = handleList.map((item) => new item(this.core));
     bot.on("room-invite", this.eventRoomInvite.bind(this));
     bot.on("friendship", this.eventFriendship.bind(this));
     bot.on("message", this.eventMessage.bind(this));
     bot.on("all", this.eventAll.bind(this));
-    this.startRoomListen();
+    await this.startRoomListen();
   }
   async startRoomListen() {
     const { bot } = this.core;
     // TODO 根据配置，后续查询方法自己实现，且转room类
     // const rooms = await bot.Room.findAll();
     // const rooms = [await bot.Room.find("51555423480@chatroom")];
-    // 因框架限制 部分未保存群需要手动 同步才可选择，后续业务处理
-    //  const info = await GetRoomInfo({
-    //   appId: getAppId(),
-    //   chatroomId: batch[0]
-    // });
-    // if (info) {
-    //   db.insertRoom(info);
-    // }
     // rooms.forEach(async (room) => {
     //   room.on("join", this.eventRoomJoin.bind(this));
     //   room.on("leave", this.eventRoomLeave.bind(this));
@@ -42,76 +32,53 @@ class ProcessEvents {
    * 群邀请
    */
   async eventRoomInvite(roomInvitation) {
-    // TODO 增加配置，是否自动接受
-    try {
-      await roomInvitation.accept();
-    } catch (e) {
-      console.error(e);
-    }
+    this.handleList.forEach(
+      (item) =>
+        typeof item?.onRoomInvite === "function" &&
+        item?.onRoomInvite(room, contact)
+    );
   }
   /**
    * 好友申请
    */
   async eventFriendship(friendship) {
-    // TODO 增加配置是否开启，且提示词配置
-    const scene = friendship.type(); // 获取场景 3 ：微信号搜索  4 ：QQ好友  8 ：来自群聊  15：手机号
-    if (friendship.hello() === "ding" && scene === 15) {
-      // 打招呼消息为ding 且是通过手机号添加的好友 则自动通过
-      friendship.accept();
-    }
+    this.handleList.forEach(
+      (item) =>
+        typeof item?.onFriendship === "function" &&
+        item?.onFriendship(room, contact)
+    );
   }
   async eventMentionSelf(msg) {
     // [监听] 自己被@
-    this.parserList.forEach(
+    this.handleList.forEach(
       (item) =>
         typeof item?.onMentionSelf === "function" && item?.onMentionSelf(msg)
     );
-    const room = await msg.room();
-    const topic = await room.topic();
-    console.log(`被@我\n群名称:${topic}\n内容:${msg.text()}`);
   }
   // ===== 以下是群消息监听 =====
   async eventRoomJoin(room, contact) {
     // [监听]群成员进入
-    this.parserList.forEach(
+    this.handleList.forEach(
       (item) =>
         typeof item?.onRoomJoin === "function" &&
         item?.onRoomJoin(room, contact)
     );
-    // TODO 以下废弃
-    const topic = await room.topic();
-    const log = `群聊加入\n群id:${
-      room.chatroomId
-    }\n群名称:${topic}\n群成员:${contact.name()}`;
-    console.log(log);
-    room.say(log);
   }
   async eventRoomLeave(room, contact) {
     // [监听]群成员退出
-    this.parserList.forEach(
+    this.handleList.forEach(
       (item) =>
         typeof item?.onRoomLeave === "function" &&
         item?.onRoomLeave(room, contact)
     );
-    // TODO 以下废弃
-    const topic = await room.topic();
-    const log = `群聊退出\n群id:${
-      room.chatroomId
-    }\n群名称:${topic}\n群成员:${contact.name()}\n群备注:${contact.alias()}`;
-    console.log(log);
-    room.say(log);
   }
   async eventRoomTopic(room, newTopic, oldTopic) {
     // [监听]群名称变更 Message
-    this.parserList.forEach(
+    this.handleList.forEach(
       (item) =>
         typeof item?.onRoomTopic === "function" &&
         item?.onRoomTopic(room, newTopic, oldTopic)
     );
-    // TODO 以下废弃
-    const log = `群聊名称变更\n群id:${room.chatroomId}\n旧群名称:${oldTopic}\n新群名称:${newTopic}`;
-    console.log(log);
-    room.say(log);
   }
 
   /**
@@ -119,37 +86,21 @@ class ProcessEvents {
    * @param {*} msg
    */
   async eventMessage(msg) {
-    // [监听]消息 Message
-    this.parserList.forEach(
-      (item) => typeof item?.onMessage === "function" && item?.onMessage(msg)
-    );
-    const { bot } = this.core;
     const mentionSelf = await msg.mentionSelf();
     if (mentionSelf) {
       this.eventMentionSelf(msg);
     }
-    if (msg.type() === bot.Message.Type.Text) {
-      //类型详见 MessageType 表
-      console.log("收到文字", msg.text(), msg);
-    }
-    console.log("MsgType", msg.type());
-    if (msg.type() === bot.Message.Type.Image) {
-      console.log("收到图片");
-      const { url } = await msg.toFileBox();
-      console.log("图片地址:", url);
-    }
+    // [监听]消息 Message
+    this.handleList.forEach(
+      (item) => typeof item?.onMessage === "function" && item?.onMessage(msg)
+    );
   }
   eventAll(msg) {
     // [监听]原始消息
-    this.parserList.forEach(
+    this.handleList.forEach(
       (item) =>
-        typeof item?.onAllMessage === "function" && item?.onAllMessage(msg)
+        typeof item?.onRawMessage === "function" && item?.onRawMessage(msg)
     );
-    // console.log("eventAll", "原始消息", msg.TypeName);
-    // 实现自定义的其他监听扩展
-    if (msg.TypeName == "ModContacts") {
-      // console.log("eventAll", msg);
-    }
   }
 }
 

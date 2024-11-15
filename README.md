@@ -7,7 +7,7 @@ wxPA 是基于 [gewechaty](https://github.com/mikoshu/gewechaty)项目的二次�
 ### nodejs
 
 ```shell
-node main.js
+npm run start
 ```
 
 ### docker-compose
@@ -26,6 +26,9 @@ docker-compose up
 [ ] 群聊自动回复
 [ ] 群聊自动加人
 [ ] 群聊自动踢人
+
+## 心跳监听逻辑(想法)
+基于公众号的消息推送，服务端主动下发。通过消息监听获取是否接受，反推服务端。
 
 ## 免责声明【必读】
 

@@ -4,10 +4,17 @@ const { DB } = require("../db");
 const { botStart } = require("../libs/GeweBot");
 const { ProcessEvents } = require("../core/ProcessEvents");
 const { cronTaskInit } = require("../core/cronTask");
+const { restartServer } = require("../utils/system");
 exports.bootstrap = async (config) => {
-  // TODO 此处配置后续抽离
   const { app, router, bot } = await botStart(config);
+  // TODO 此处配置后续抽离
+  router.get("/restart", async (ctx) => {
+    restartServer();
+    ctx.body = "重启中........";
+  });
+  app.use(router.routes()).use(router.allowedMethods());
   const db = new DB(`${bot.getAppId()}.db`);
+  await db.bootstrap();
   const core = {
     app,
     db,

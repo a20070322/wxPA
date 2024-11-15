@@ -18,7 +18,8 @@ class Message extends Base {
     msgSource TEXT,
     pushContent TEXT,
     msgSeq INTEGER,
-    jsonData TEXT
+    jsonData TEXT,
+    url TEXT
   `;
   findOne({ newMsgId }) {
     let sql = `SELECT * FROM ${this.tableName} WHERE 1=1`;
@@ -33,6 +34,68 @@ class Message extends Base {
     const stmt = this.db.prepare(sql);
     const rows = stmt.all({ wxid });
     return rows || [];
+  }
+  /** 插入数据 */
+  insertMessage(msg, raw) {
+    const stmt = this.db.prepare(`
+      INSERT INTO message (
+          wxid,
+          fromUserName,
+          toUserName,
+          msgType,
+          content,
+          status,
+          imgStatus,
+          imgBuf,
+          createTime,
+          msgSource,
+          pushContent,
+          newMsgId,
+          msgSeq,
+          jsonData
+      ) VALUES (
+          @wxid,
+          @fromUserName,
+          @toUserName,
+          @msgType,
+          @content,
+          @status,
+          @imgStatus,
+          @imgBuf,
+          @createTime,
+          @msgSource,
+          @pushContent,
+          @newMsgId,
+          @msgSeq,
+          @jsonData
+      )
+  `);
+    stmt.run({
+      wxid: msg.Wxid,
+      fromUserName: msg.FromUserName?.string || "",
+      toUserName: msg.ToUserName?.string || "",
+      msgType: msg.MsgType,
+      content: msg.Content ? msg.Content?.string : null,
+      status: msg.Status,
+      imgStatus: msg.ImgStatus,
+      imgBuf: msg.ImgBuf ? msg.ImgBuf.iLen.toString() : null,
+      createTime: msg.CreateTime,
+      msgSource: msg.MsgSource,
+      pushContent: msg.PushContent,
+      newMsgId: msg.NewMsgId,
+      msgSeq: msg.MsgSeq,
+      jsonData: JSON.stringify(raw),
+    });
+  }
+  /** 更新url根据 newMsgId */
+  updateUrl(newMsgId, url) {
+    const stmt = this.db.prepare(`
+      UPDATE ${this.tableName} SET url=@url WHERE newMsgId=@newMsgId
+  `);
+    stmt.run({
+      url,
+      newMsgId,
+    });
   }
 }
 exports.Message = Message;
