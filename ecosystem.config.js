@@ -8,11 +8,11 @@ module.exports = {
       autorestart: false,
     },
     // TODO 使用另个端口启动服务作为机器人管理及登录相关
-    // {
-    //   name: "server",
-    //   instances: 1,
-    //   script: "test/test.js",
-    //   autorestart: false,
-    // },
+    {
+      name: `${packageJson.name}_web`,
+      instances: 1,
+      script: "web/server.js",
+      autorestart: true,
+    },
   ],
 };
